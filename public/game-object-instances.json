@@ -1,0 +1,27 @@
+[
+  {
+    "identifier": "flask",
+    "x": -400,
+    "y": 0
+  },
+  {
+    "identifier": "flask",
+    "x": 0,
+    "y": -400
+  },
+  {
+    "identifier": "flask",
+    "x": 400,
+    "y": 0
+  },
+  {
+    "identifier": "flask",
+    "x": 0,
+    "y": 400
+  },
+  {
+    "identifier": "saphireAmulet",
+    "x": -300,
+    "y": -300
+  }
+]

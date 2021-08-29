@@ -1,0 +1,20 @@
+[
+  {
+    "identifier": "flask",
+    "class": "baseGameObject",
+    "spriteClass": "sprite",
+    "sprite": "/assets/flask.png",
+    "width": 40,
+    "height": 40,
+    "description": "A mysterious flask containing some kind of potion..."
+  },
+  {
+    "identifier": "saphireAmulet",
+    "class": "baseGameObject",
+    "spriteClass": "sprite",
+    "sprite": "/assets/saphire-amulet.png",
+    "width": 50,
+    "height": 50,
+    "description": "A saphire amulet from osrs."
+  }
+]

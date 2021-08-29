@@ -1,0 +1,28 @@
+{
+  "name": "loopquest",
+  "version": "1.0.0",
+  "description": "LoopQuest game",
+  "main": "index.js",
+  "scripts": {
+    "start": "snowpack dev",
+    "build": "snowpack build"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.15.0",
+    "@babel/preset-env": "^7.15.0",
+    "@babel/preset-typescript": "^7.15.0",
+    "@types/axios": "^0.14.0",
+    "@types/jest": "^27.0.1",
+    "@types/uuid": "^8.3.1",
+    "babel-jest": "^27.1.0",
+    "jest": "^27.1.0",
+    "snowpack": "^3.8.6"
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "rxjs": "^7.3.0",
+    "uuid": "^8.3.2"
+  }
+}

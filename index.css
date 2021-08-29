@@ -1,0 +1,9 @@
+body {
+  background-color: papayawhip;
+}
+
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}

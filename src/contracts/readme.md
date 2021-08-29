@@ -1,0 +1,1 @@
+For general contracts not bound to a single module.
