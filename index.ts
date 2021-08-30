@@ -2,7 +2,7 @@ import { map, ReplaySubject, share, switchMap } from "rxjs";
 import { PlayerCharacter } from "./src/character/src/character";
 import { buildGUI } from "./src/GUI/src/GUI";
 import { getMouseClickStream, getMousePositionStream, getZoomStream, setCanvasFullScreen } from "./src/IO/src";
-import { getGameObjectFactory } from "./src/objects/src/game-object-factory2";
+import { getGameObjectFactory } from "./src/objects/src/game-object-factory";
 import { getObjectDetectionStream } from "./src/objects/src/object-detection";
 import { ObjectManager } from "./src/objects/src/object-manager";
 import { ObjectRenderer } from "./src/objects/src/object-renderer";
