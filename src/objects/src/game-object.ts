@@ -10,7 +10,7 @@ export class BaseGameObject implements GameObject, Destructable {
   private readonly _destroy$: Subject<void> = new Subject<void>();
   readonly sprite: Sprite;
   readonly config: GameObjectConfig;
-  readonly actions?: GameObjectAction<BaseGameObject>[];
+  readonly actions?: GameObjectAction[];
   location: Location;
 
   get destroy$() {
@@ -21,12 +21,7 @@ export class BaseGameObject implements GameObject, Destructable {
     return this.config.description;
   }
 
-  constructor(
-    sprite: Sprite,
-    config: GameObjectConfig,
-    location: Location,
-    actions?: GameObjectAction<BaseGameObject>[]
-  ) {
+  constructor(sprite: Sprite, config: GameObjectConfig, location: Location, actions?: GameObjectAction[]) {
     if (!sprite) {
       throw new Error("GameObject has no valid sprite!");
     }
@@ -42,15 +37,18 @@ export class BaseGameObject implements GameObject, Destructable {
     this._destroy$.complete();
   }
 
-  /** @todo implement */
+  /** @todo implement or remove */
   public examine(): void {
     console.log("examine!");
   }
 
-  protected checkActionImplementations(actions: GameObjectAction<BaseGameObject>[] | undefined): void {
+  protected checkActionImplementations(actions: GameObjectAction[] | undefined): void {
     actions?.forEach((action) => {
-      if (typeof this[action.handler] !== "function") {
-        throw new Error(`Handler ${action.handler} for action ${action.description} not implemented in ${this.constructor.name}!`);
+      const handler = action.handler as keyof this;
+      if (typeof this[handler] !== "function") {
+        throw new Error(
+          `Handler ${action.handler} for action ${action.description} not implemented in ${this.constructor.name}!`
+        );
       }
     });
   }

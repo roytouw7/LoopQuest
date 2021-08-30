@@ -15,7 +15,7 @@ interface GameObjectSeed {
   width: number;
   height: number;
   description: string;
-  actions: GameObjectAction<unknown>[];
+  actions: GameObjectAction[];
 }
 
 interface GameObjectInstanceSeed {
@@ -26,7 +26,6 @@ interface GameObjectInstanceSeed {
 
 /**
  *  @todo Perspective and radius should be included to only load instances withing radius
- *  @todo Add error handling for json seed file mistakes
  */
 export const getGameObjectFactory = (perspective$: Observable<Location>, radius: number) => {
   return () => {
@@ -69,14 +68,6 @@ const createGameObjectInstances = (
   gameObjectSeeds: GameObjectSeed[],
   sprites: Sprite[]
 ): GameObject[] => {
-  // return gameObjectInstanceSeeds.map((gameObjectInstanceSeed) => {
-  //   const [gameObjectSeed, sprite] = getMatchingGameObjectSeedAndSprite(
-  //     gameObjectInstanceSeed.identifier,
-  //     gameObjectSeeds,
-  //     sprites
-  //   );
-  //   return createInstance(gameObjectInstanceSeed, gameObjectSeed, sprite);
-  // });
   return gameObjectInstanceSeeds.reduce((acc: GameObject[], gameObjectInstanceSeed: GameObjectInstanceSeed) => {
     const [gameObjectSeed, sprite] = getMatchingGameObjectSeedAndSprite(
       gameObjectInstanceSeed.identifier,
