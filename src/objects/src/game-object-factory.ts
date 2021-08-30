@@ -1,6 +1,7 @@
 import axios from "axios";
 import { combineLatestWith, from, map, Observable, pluck } from "rxjs";
 import { GameObject } from "../contracts/game-object";
+import { GameObjectAction } from "../contracts/game-object-actions";
 import { Location } from "../contracts/position";
 import { Sprite } from "../contracts/sprite";
 import { BaseSprite } from "./base-sprite";
@@ -14,6 +15,7 @@ interface GameObjectSeed {
   width: number;
   height: number;
   description: string;
+  actions: GameObjectAction<unknown>[];
 }
 
 interface GameObjectInstanceSeed {
@@ -22,7 +24,10 @@ interface GameObjectInstanceSeed {
   y: number;
 }
 
-/** @todo Perspective and radius should be included to only load instances withing radius */
+/**
+ *  @todo Perspective and radius should be included to only load instances withing radius
+ *  @todo Add error handling for json seed file mistakes
+ */
 export const getGameObjectFactory = (perspective$: Observable<Location>, radius: number) => {
   return () => {
     return from(axios.get<GameObjectSeed[]>("public/game-objects.json")).pipe(
@@ -64,18 +69,47 @@ const createGameObjectInstances = (
   gameObjectSeeds: GameObjectSeed[],
   sprites: Sprite[]
 ): GameObject[] => {
-  return gameObjectInstanceSeeds.map((gameObjectInstanceSeed) => {
-    const gameObjectSeed = gameObjectSeeds.find((object) => object.identifier === gameObjectInstanceSeed.identifier);
-    const sprite = sprites.find((sprite) => sprite.spriteConfig.url === gameObjectSeed?.sprite);
-    if (!gameObjectSeed) {
-      throw new Error(
-        `GameObject and GameObjectInstance mismatch! No matching gameObjectSeed found for ${gameObjectInstanceSeed.identifier}!`
-      );
-    } else if (!sprite) {
-      throw new Error(`GameObject and Sprite mismatch! No matching sprite found for ${gameObjectSeed.sprite}!`);
+  // return gameObjectInstanceSeeds.map((gameObjectInstanceSeed) => {
+  //   const [gameObjectSeed, sprite] = getMatchingGameObjectSeedAndSprite(
+  //     gameObjectInstanceSeed.identifier,
+  //     gameObjectSeeds,
+  //     sprites
+  //   );
+  //   return createInstance(gameObjectInstanceSeed, gameObjectSeed, sprite);
+  // });
+  return gameObjectInstanceSeeds.reduce((acc: GameObject[], gameObjectInstanceSeed: GameObjectInstanceSeed) => {
+    const [gameObjectSeed, sprite] = getMatchingGameObjectSeedAndSprite(
+      gameObjectInstanceSeed.identifier,
+      gameObjectSeeds,
+      sprites
+    );
+
+    try {
+      acc.push(createInstance(gameObjectInstanceSeed, gameObjectSeed, sprite));
+    } catch (e: unknown) {
+      console.error(e);
+      console.error(`Unable to create instance of ${gameObjectSeed.identifier}!`);
     }
-    return createInstance(gameObjectInstanceSeed, gameObjectSeed, sprite);
-  });
+
+    return acc;
+  }, []);
+};
+
+const getMatchingGameObjectSeedAndSprite = (
+  identifier: string,
+  gameObjectSeeds: GameObjectSeed[],
+  sprites: Sprite[]
+): [GameObjectSeed, Sprite] => {
+  const gameObjectSeed = gameObjectSeeds.find((object) => object.identifier === identifier);
+  const sprite = sprites.find((sprite) => sprite.spriteConfig.url === gameObjectSeed?.sprite);
+
+  if (!gameObjectSeed) {
+    throw new Error(`GameObject and GameObjectInstance mismatch! No matching gameObjectSeed found for ${identifier}!`);
+  } else if (!sprite) {
+    throw new Error(`GameObject and Sprite mismatch! No matching sprite found for ${gameObjectSeed.sprite}!`);
+  }
+
+  return [gameObjectSeed, sprite];
 };
 
 const createInstance = (
@@ -86,7 +120,7 @@ const createInstance = (
   switch (gameObjectSeed.class) {
     case "baseGameObject":
       const location = { x: gameObjectInstanceSeed.x, y: gameObjectInstanceSeed.y };
-      return new BaseGameObject(sprite, { description: gameObjectSeed.description }, location);
+      return new BaseGameObject(sprite, { description: gameObjectSeed.description }, location, gameObjectSeed.actions);
     default:
       throw new Error(`Invalid GameObjectSeed class ${gameObjectSeed.class}!`);
   }

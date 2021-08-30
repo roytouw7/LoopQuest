@@ -6,7 +6,8 @@
     "sprite": "/assets/flask.png",
     "width": 40,
     "height": 40,
-    "description": "A mysterious flask containing some kind of potion..."
+    "description": "A mysterious flask containing some kind of potion...",
+    "actions": [{ "description": "examine", "handler": "examine2" }]
   },
   {
     "identifier": "saphireAmulet",

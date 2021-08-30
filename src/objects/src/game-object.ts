@@ -1,6 +1,7 @@
 import { Subject } from "rxjs";
 import { Destructable } from "../../GUI/contracts";
 import { GameObject } from "../contracts/game-object";
+import { GameObjectAction } from "../contracts/game-object-actions";
 import { GameObjectConfig } from "../contracts/game-object-config";
 import { Location } from "../contracts/position";
 import { Sprite } from "../contracts/sprite";
@@ -9,6 +10,7 @@ export class BaseGameObject implements GameObject, Destructable {
   private readonly _destroy$: Subject<void> = new Subject<void>();
   readonly sprite: Sprite;
   readonly config: GameObjectConfig;
+  readonly actions?: GameObjectAction<BaseGameObject>[];
   location: Location;
 
   get destroy$() {
@@ -19,17 +21,37 @@ export class BaseGameObject implements GameObject, Destructable {
     return this.config.description;
   }
 
-  constructor(sprite: Sprite, config: GameObjectConfig, location: Location) {
+  constructor(
+    sprite: Sprite,
+    config: GameObjectConfig,
+    location: Location,
+    actions?: GameObjectAction<BaseGameObject>[]
+  ) {
     if (!sprite) {
       throw new Error("GameObject has no valid sprite!");
     }
+    this.checkActionImplementations(actions);
     this.sprite = sprite;
     this.config = config;
+    this.actions = actions;
     this.location = location;
   }
 
   public destruct(): void {
     this._destroy$.next();
     this._destroy$.complete();
+  }
+
+  /** @todo implement */
+  public examine(): void {
+    console.log("examine!");
+  }
+
+  protected checkActionImplementations(actions: GameObjectAction<BaseGameObject>[] | undefined): void {
+    actions?.forEach((action) => {
+      if (typeof this[action.handler] !== "function") {
+        throw new Error(`Handler ${action.handler} for action ${action.description} not implemented in ${this.constructor.name}!`);
+      }
+    });
   }
 }
