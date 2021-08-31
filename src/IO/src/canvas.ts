@@ -30,9 +30,17 @@ export const setCanvasFullScreen = (): Observable<void> => {
       getCanvas().height = windowSize.height;
       getCtx().imageSmoothingEnabled = true;
       getCtx().imageSmoothingQuality = "high";
+
+      getCanvas().oncontextmenu = (e) => preventDefault(e);
+      getGUICanvas().oncontextmenu = (e) => preventDefault(e);
     }),
     mapTo(void 0)
   );
+};
+
+const preventDefault = (e: MouseEvent) => {
+  e.preventDefault();
+  e.stopPropagation();
 };
 
 export const clearCanvas = (): void => {

@@ -1,7 +1,15 @@
-import { map, ReplaySubject, share, switchMap } from "rxjs";
+import { Observable, ReplaySubject, share, switchMap, switchMapTo, take } from "rxjs";
 import { PlayerCharacter } from "./src/character/src/character";
+import { Button } from "./src/GUI/src/button";
 import { buildGUI } from "./src/GUI/src/GUI";
-import { getMouseClickStream, getMousePositionStream, getZoomStream, setCanvasFullScreen } from "./src/IO/src";
+import {
+  getMouseClickStream,
+  getMousePositionStream,
+  getRightMouseClickStream,
+  getZoomStream,
+  setCanvasFullScreen
+} from "./src/IO/src";
+import { GameObject } from "./src/objects/contracts/game-object";
 import { getGameObjectFactory } from "./src/objects/src/game-object-factory";
 import { getObjectDetectionStream } from "./src/objects/src/object-detection";
 import { ObjectManager } from "./src/objects/src/object-manager";
@@ -27,10 +35,18 @@ setCanvasFullScreen().subscribe(() => {
     getMousePositionStream(),
     objectManager.gameObjects$,
     getZoomStream()
-  ).pipe(
-    map((gameObjects) => gameObjects.pop()?.config.description),
-    map((description) => (description ? description : ""))
   );
 
   buildGUI(objectDetection$);
+
+  testRightClickObjectSelection(objectDetection$);
+  new Button();
 });
+
+const testRightClickObjectSelection = (objectDetection$: Observable<GameObject[]>) => {
+  getRightMouseClickStream()
+    .pipe(switchMapTo(objectDetection$), take(1))
+    .subscribe((gameObjects) => {
+      gameObjects.forEach(object => object.actions?.forEach(action => console.log(`${action.description} ${object.config.description}`)))
+    });
+};

@@ -3,6 +3,7 @@ import {
   filter,
   fromEvent,
   map,
+  mapTo,
   Observable,
   pluck,
   ReplaySubject,
@@ -43,6 +44,16 @@ const createMouseClickStream = () => {
   return () => source$;
 };
 
+const createRightMouseClickStream = () => {
+  const source$ = fromEvent(document, "mousedown").pipe(
+    pluck("button"),
+    filter((button) => button === 2),
+    mapTo(void 0)
+  );
+
+  return () => source$;
+};
+
 const zoomLevels = [0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 1.85, 1.95, 2];
 
 const createZoomStream = () => {
@@ -67,4 +78,5 @@ const createZoomStream = () => {
 
 export const getMousePositionStream = createMousePositionStream();
 export const getMouseClickStream = createMouseClickStream();
+export const getRightMouseClickStream = createRightMouseClickStream();
 export const getZoomStream = createZoomStream();

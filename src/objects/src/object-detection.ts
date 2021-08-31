@@ -1,4 +1,4 @@
-import { combineLatestWith, map, Observable, ReplaySubject, share, throttleTime } from "rxjs";
+import { combineLatestWith, map, Observable, ReplaySubject, share, tap, throttleTime } from "rxjs";
 import { Coordinates } from "../../contracts";
 import { move } from "../../movement/src/movement";
 import { GameObject } from "../contracts/game-object";

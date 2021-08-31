@@ -58,6 +58,11 @@ export abstract class BasePane implements Pane, Destructable {
     this.setUpPane();
   }
 
+  public drawPane(): void {
+    this.ctx.fillStyle = this.backgroundColor?.hex ?? Config.defaultBackgroundColor.hex;
+    this.ctx.rect(this.x, this.y, this.width, this.height);
+  }
+
   public destruct(): void {
     this.ctx.clearRect(this.x, this.y, this.width, this.height);
     this._destroy$.next();
@@ -66,6 +71,7 @@ export abstract class BasePane implements Pane, Destructable {
 
   private setUpPane(): void {
     if (this.color) {
+      console.log("drawing basepane");
       this.ctx.fillStyle = this?.backgroundColor?.hex ?? Config.defaultBackgroundColor.hex;
     }
   }
