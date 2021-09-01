@@ -1,6 +1,6 @@
-import { combineLatestWith, map, Observable, ReplaySubject, share, tap, throttleTime } from "rxjs";
+import { combineLatestWith, map, Observable, ReplaySubject, share, throttleTime } from "rxjs";
 import { Coordinates } from "../../contracts";
-import { move } from "../../movement/src/movement";
+import { transformProjectionLocationToRealDistance } from "../../movement/src/movement";
 import { GameObject } from "../contracts/game-object";
 import { Location } from "../contracts/position";
 
@@ -14,7 +14,7 @@ export const getObjectDetectionStream = (
     combineLatestWith(mousePosition$, gameObjects$, zoom$),
     map((set) => {
       const [perspective, mousePosition, gameObjects, zoom] = set;
-      const delta = move(mousePosition, zoom);
+      const delta = transformProjectionLocationToRealDistance(mousePosition, zoom);
       const location: Location = {
         x: perspective.x + delta.dX,
         y: perspective.y + delta.dY,

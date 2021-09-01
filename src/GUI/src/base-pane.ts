@@ -45,7 +45,6 @@ export abstract class BasePane implements Destructable {
 
   constructor(width: number, height: number, x: number, y: number, backgroundColor?: GUIColor, color?: GUIColor) {
     this.id = uuid();
-    console.log(`create ${this.constructor.name} ${this.id}`)
     this.canvas = getGUICanvas();
     this.ctx = getGUICtx();
     this._width = width;
