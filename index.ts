@@ -40,7 +40,7 @@ setCanvasFullScreen().subscribe(() => {
   buildGUI(objectDetection$);
 
   testRightClickObjectSelection(objectDetection$);
-  new Button();
+  // new Button();
 });
 
 const testRightClickObjectSelection = (objectDetection$: Observable<GameObject[]>) => {

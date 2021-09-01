@@ -1,3 +1,4 @@
+import { Observable } from "rxjs";
 import { Manager } from "../../controllers/src/manager";
 import { Pane } from "../contracts";
 
@@ -5,6 +6,10 @@ import { Pane } from "../contracts";
 export class PaneManager {
   private static instance: PaneManager;
   private readonly manager: Manager<Pane>;
+
+  public get panes$(): Observable<Pane[]> {
+    return this.manager.object$;
+  }
 
   private constructor() {
     this.manager = new Manager<Pane>();

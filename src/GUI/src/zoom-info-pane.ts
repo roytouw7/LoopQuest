@@ -10,6 +10,7 @@ export class ZoomInfoPane extends TextPane {
       height: 6,
       x: 0,
       y: 0,
+      backgroundColor: { hex: '#FFFFFF'}
     };
 
     const textConfig: TextConfig = {

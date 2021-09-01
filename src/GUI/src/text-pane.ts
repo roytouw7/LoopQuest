@@ -1,13 +1,12 @@
 import { Observable } from "rxjs";
+import { Pane } from "../contracts";
 import { Destructable } from "../contracts/destructable";
 import { PaneConfig } from "../contracts/pane-config";
 import { TextAlign, TextConfig, VerticalTextAlign } from "../contracts/text-config";
-import { cleanupOnDestroy } from "../decorators/cleanup-on-destroy";
 import { BasePane } from "./base-pane";
 import { Config } from "./config";
 
-export abstract class TextPane extends BasePane implements Destructable {
-  @cleanupOnDestroy
+export abstract class TextPane extends BasePane implements Pane, Destructable {
   private readonly text$: Observable<string>;
   private readonly textConfig?: TextConfig;
 
@@ -15,12 +14,16 @@ export abstract class TextPane extends BasePane implements Destructable {
     super(config.width, config.height, config.x, config.y, config.backgroundColor, config.color);
     this.text$ = text$;
     this.textConfig = textConfig;
+  }
+
+  public drawPane(): void {
     this.setUpTextPane();
     this.drawText();
   }
 
   private setUpTextPane(): void {
     this.ctx.font = Config.defaultFont;
+    this.ctx.fillStyle = this.backgroundColor?.hex ?? Config.defaultBackgroundColor.hex;
     this.ctx.fillRect(this.x, this.y, this.width, this.height);
   }
 

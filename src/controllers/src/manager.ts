@@ -1,4 +1,4 @@
-import { Observable, ReplaySubject, share, Subject } from "rxjs";
+import { Observable, ReplaySubject } from "rxjs";
 
 interface Managable {
   readonly id: string;
@@ -12,14 +12,14 @@ interface ManagerInterface<T extends Managable> {
 
 export class Manager<T extends Managable> implements ManagerInterface<T> {
   private readonly collection: T[] = [];
-  private readonly _object$: Subject<T[]>;
+  private readonly _object$: ReplaySubject<T[]>;
 
   public get object$(): Observable<T[]> {
-    return this._object$.pipe(share({ connector: () => new ReplaySubject(1), resetOnRefCountZero: false }));
+    return this._object$;
   }
 
   constructor() {
-    this._object$ = new Subject<T[]>();
+    this._object$ = new ReplaySubject<T[]>(1);
   }
 
   registerObject(object: T): void {

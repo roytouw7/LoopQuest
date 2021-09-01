@@ -1,3 +1,4 @@
+import { GameObject } from "../../objects/contracts/game-object";
 import { Location } from "../../objects/contracts/position";
 import { ProjectedLocation } from "../../objects/contracts/projected-location";
 import { BaseGameObject } from "../../objects/src/game-object";
@@ -17,7 +18,7 @@ export class Projection {
     return Projection.instance;
   }
 
-  public drawGameObject(object: BaseGameObject, perspective: Location, zoom: number): void {
+  public drawGameObject(object: GameObject, perspective: Location, zoom: number): void {
     const { x, y } = object.location;
     const { img } = object.sprite;
     const { width, height } = object.sprite.spriteConfig;
