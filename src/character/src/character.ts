@@ -1,4 +1,4 @@
-import { map, Observable, of, scan, startWith, tap, withLatestFrom } from "rxjs";
+import { map, Observable, ReplaySubject, scan, share, startWith, tap, withLatestFrom } from "rxjs";
 import { Coordinates } from "../../contracts";
 import { Vector } from "../../movement/contracts/vector";
 import { transformProjectionLocationToRealDistance } from "../../movement/src/movement";
@@ -8,13 +8,19 @@ import { Sprite } from "../../objects/contracts/sprite";
 import { BaseGameObject } from "../../objects/src/game-object";
 
 export class PlayerCharacter extends BaseGameObject {
-  public readonly position$: Observable<Location>;
+  private readonly _position$: Observable<Location>;
 
-  constructor(mouseClick$: Observable<Coordinates>, startLocation: Location, zoom$: Observable<number>) {
+  public get position$(): Observable<Location> {
+    return this._position$.pipe(share({ connector: () => new ReplaySubject(1), resetOnRefCountZero: false }));
+  }
+
+  /**
+   * @todo character should consume the new mapClickStream, but mapClickStream requires perspective from character...?
+   */
+  constructor(mapClick$: Observable<Coordinates>, startLocation: Location, zoom$: Observable<number>) {
     const sprite = PlayerCharacter.createCharacterSprite();
     super(sprite, { description: "The main character of the game!" }, startLocation);
-    // this.position$ = this.coordinateToLocation(mouseClick$, startLocation, zoom$);
-    this.position$ = of({x: 0, y: 0})
+    this._position$ = this.coordinateToLocation(mapClick$, startLocation, zoom$);
   }
 
   private coordinateToLocation(

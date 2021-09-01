@@ -25,10 +25,14 @@ interface GameObjectInstanceSeed {
 }
 
 /**
+ * Returnts a gameObjectFactory constructing GameObjects
  *  @todo Perspective and radius should be included to only load instances withing radius
  */
-export const getGameObjectFactory = (perspective$: Observable<Location>, radius: number) => {
-  return () => {
+export const getGameObjectFactory = (
+  perspective$: Observable<Location>,
+  radius: number
+): (() => Observable<GameObject[]>) => {
+  return (): Observable<GameObject[]> => {
     return from(axios.get<GameObjectSeed[]>("public/game-objects.json")).pipe(
       pluck("data"),
       combineLatestWith(fetchGameObjectInstanceSeeds()),
