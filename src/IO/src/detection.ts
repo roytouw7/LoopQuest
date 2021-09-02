@@ -8,11 +8,13 @@ import {
   scan,
   share,
   switchMapTo,
+  take,
   withLatestFrom,
 } from "rxjs";
 import { Coordinates } from "../../contracts";
 import { Pane } from "../../GUI/contracts";
 import { PaneManager } from "../../GUI/src/pane-manager";
+import { isNotUndefined } from "../../helper/notUndefinedOperator";
 import { Vector } from "../../movement/contracts/vector";
 import { transformProjectionLocationToRealDistance } from "../../movement/src/movement";
 import { GameObject } from "../../objects/contracts/game-object";
@@ -20,7 +22,7 @@ import { Location } from "../../objects/contracts/position";
 import { ObjectManager } from "../../objects/src/object-manager";
 import { getMouseClickStream, getMousePositionStream, getZoomStream } from "./mouse-input";
 
-export const getPaneDetectionStream = (): Observable<Pane | null> => {
+export const getPaneDetectionStream = (): Observable<Pane[]> => {
   const mouseLocation$ = getMousePositionStream();
   const panes$ = PaneManager.getInstance().panes$;
 
@@ -28,9 +30,9 @@ export const getPaneDetectionStream = (): Observable<Pane | null> => {
     withLatestFrom(panes$),
     map((set) => {
       const [position, panes] = set;
-      const pane = panes.find((pane) => paneAtPosition(position, pane));
+      const detectedPanes = panes.filter((pane) => paneAtPosition(position, pane));
 
-      return pane ? pane : null;
+      return detectedPanes;
     }),
     share({ connector: () => new ReplaySubject(1), resetOnRefCountZero: false })
   );
@@ -40,13 +42,13 @@ export const getGameObjectDetectionStream = (perspective$: Observable<Location>)
   const mouseLocation$ = getMousePositionStream();
   const gameObjects$ = ObjectManager.getInstance(perspective$).gameObjects$;
   const zoom$ = getZoomStream();
-  const pane$ = getPaneDetectionStream();
+  const panes$ = getPaneDetectionStream();
 
-  return pane$.pipe(
-    switchMapTo(mouseLocation$.pipe(combineLatestWith(gameObjects$, zoom$, perspective$, pane$))),
+  return panes$.pipe(
+    switchMapTo(mouseLocation$.pipe(combineLatestWith(gameObjects$, zoom$, perspective$, panes$))),
     map((set) => {
-      const [mousePosition, gameObjects, zoom, perspective, pane] = set;
-      if (pane) {
+      const [mousePosition, gameObjects, zoom, perspective, panes] = set;
+      if (panes.length > 0) {
         // Pane in front of object
         return [];
       }
@@ -68,13 +70,13 @@ export const getGameObjectDetectionStream = (perspective$: Observable<Location>)
 export const getMapClickStream = (): Observable<Vector> => {
   const mouseClick$ = getMouseClickStream();
   const zoom$ = getZoomStream();
-  const pane$ = getPaneDetectionStream();
+  const panes$ = getPaneDetectionStream();
 
   return mouseClick$.pipe(
-    withLatestFrom(zoom$, pane$),
+    withLatestFrom(zoom$, panes$),
     map((set) => {
-      const [mouseClickPosition, zoom, pane] = set;
-      if (pane) {
+      const [mouseClickPosition, zoom, panes] = set;
+      if (panes.length > 0) {
         return null;
       }
 
@@ -103,6 +105,19 @@ export const getMapLocationStream = (
       )
     ),
     share({ connector: () => new ReplaySubject(1), resetOnRefCountZero: false })
+  );
+};
+
+export const getPaneActionStream = (): Observable<(...args: unknown[]) => void> => {
+  return getMouseClickStream().pipe(
+    switchMapTo(
+      getPaneDetectionStream().pipe(
+        take(1),
+        filter((panes) => panes.length > 0),
+        map((panes) => panes.filter((pane) => pane.action).pop()?.action),
+        filter(isNotUndefined)
+      )
+    )
   );
 };
 

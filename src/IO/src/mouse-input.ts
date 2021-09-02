@@ -12,7 +12,6 @@ import {
   startWith,
   switchMapTo,
   take,
-  tap,
   throttleTime,
 } from "rxjs";
 import { Coordinates } from "../../contracts";
@@ -45,10 +44,12 @@ const createMouseClickStream = () => {
 };
 
 const createRightMouseClickStream = () => {
+  const mousePositionStream$ = getMousePositionStream().pipe(take(1));
   const source$ = fromEvent(document, "mousedown").pipe(
     pluck("button"),
     filter((button) => button === 2),
-    mapTo(void 0)
+    mapTo(void 0),
+    switchMapTo(mousePositionStream$)
   );
 
   return () => source$;

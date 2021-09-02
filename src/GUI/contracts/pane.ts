@@ -10,5 +10,7 @@ export interface Pane extends Destructable {
   color?: GUIColor;
   backgroundColor?: GUIColor;
   clickTrough?: boolean;
+  children?: Pane[];
   drawPane: () => void;
+  action?: () => void;
 }

@@ -1,16 +1,18 @@
 import { Observable, ReplaySubject } from "rxjs";
 
-interface Managable {
+interface Managable<T> {
   readonly id: string;
+  children?: T[];
 }
 
-interface ManagerInterface<T extends Managable> {
+interface ManagerInterface<T extends Managable<T>> {
   registerObject: (object: T) => void;
   unregisterObject: (id: string) => T;
   object$: Observable<T[]>;
+  count(): number;
 }
 
-export class Manager<T extends Managable> implements ManagerInterface<T> {
+export class Manager<T extends Managable<T>> implements ManagerInterface<T> {
   private readonly collection: T[] = [];
   private readonly _object$: ReplaySubject<T[]>;
 
@@ -24,7 +26,19 @@ export class Manager<T extends Managable> implements ManagerInterface<T> {
 
   registerObject(object: T): void {
     this.collection.push(object);
+    if (object.children) {
+      this.registerChildrenRecursive(object.children);
+    }
     this._object$.next(this.collection);
+  }
+
+  private registerChildrenRecursive(children: T[]): void {
+    children.forEach((child) => {
+      this.collection.push(child);
+      if (child.children) {
+        this.registerChildrenRecursive(child.children);
+      }
+    });
   }
 
   unregisterObject(id: string): T {
@@ -38,5 +52,9 @@ export class Manager<T extends Managable> implements ManagerInterface<T> {
     }
     this._object$.next(this.collection);
     return removedItem;
+  }
+
+  count(): number {
+    return this.collection.length;
   }
 }

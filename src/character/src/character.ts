@@ -13,13 +13,9 @@ export class PlayerCharacter extends BaseGameObject {
     return this._position$;
   }
 
-  /**
-   * @todo character should consume the new mapClickStream, but mapClickStream requires perspective from character...?
-   */
   constructor(startLocation: Location) {
     const sprite = PlayerCharacter.createCharacterSprite();
     super(sprite, { description: "The main character of the game!" }, startLocation);
-    console.log("creating character");
     this._position$ = getMapLocationStream(startLocation, getMapClickStream()).pipe(
       tap((location) => (this.location = location)),
       startWith(startLocation)
