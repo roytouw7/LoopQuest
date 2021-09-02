@@ -34,9 +34,12 @@ const setupGameObjectCreationAndRendering = (character: PlayerCharacter): void =
 };
 
 const testRightClickObjectSelection = (objectDetection$: Observable<GameObject[]>) => {
-  getRightMouseClickStream()
-    .pipe(switchMapTo(objectDetection$.pipe(take(1))))
-    .subscribe(console.log);
+  // getRightMouseClickStream()
+  //   .pipe(switchMapTo(objectDetection$.pipe(take(1))))
+  //   .subscribe(console.log);
+
+
+  
   // getRightMouseClickStream()
   //   .pipe(log('rightclick'),switchMapTo(objectDetection$), take(1))
   //   .subscribe((gameObjects) => {

@@ -7,7 +7,7 @@
     "width": 40,
     "height": 40,
     "description": "A mysterious flask containing some kind of potion...",
-    "actions": [{ "description": "examine", "handler": "examine" }]
+    "actions": [{ "description": "examine", "handler": "examine" }, { "description": "pick up", "handler": "pickUp" }]
   },
   {
     "identifier": "saphireAmulet",

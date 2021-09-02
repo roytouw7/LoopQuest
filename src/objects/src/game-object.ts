@@ -45,6 +45,11 @@ export class BaseGameObject implements GameObject, Destructable {
     console.log("examine!");
   }
 
+  /** @todo implement or remove */
+  public pickUp(): void {
+    console.log("picked item up wowzers!");
+  }
+
   protected checkActionImplementations(actions: GameObjectAction[] | undefined): void {
     actions?.forEach((action) => {
       const handler = action.handler as keyof this;
