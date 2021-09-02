@@ -1,4 +1,15 @@
-import { combineLatestWith, filter, map, Observable, ReplaySubject, share, switchMapTo, withLatestFrom } from "rxjs";
+import {
+  combineLatestWith,
+  filter,
+  map,
+  Observable,
+  of,
+  ReplaySubject,
+  scan,
+  share,
+  switchMapTo,
+  withLatestFrom,
+} from "rxjs";
 import { Coordinates } from "../../contracts";
 import { Pane } from "../../GUI/contracts";
 import { PaneManager } from "../../GUI/src/pane-manager";
@@ -54,25 +65,45 @@ export const getGameObjectDetectionStream = (perspective$: Observable<Location>)
   );
 };
 
-export const getMapClickStream = (perspective$: Observable<Location>): Observable<Location> => {
+export const getMapClickStream = (): Observable<Vector> => {
   const mouseClick$ = getMouseClickStream();
   const zoom$ = getZoomStream();
   const pane$ = getPaneDetectionStream();
-  const gameObjects$ = getGameObjectDetectionStream(perspective$);
 
   return mouseClick$.pipe(
-    withLatestFrom(zoom$, perspective$, pane$, gameObjects$),
+    withLatestFrom(zoom$, pane$),
     map((set) => {
-      const [mouseClickPosition, zoom, perspective, pane, gameObjects] = set;
-      if (pane || gameObjects.length) {
+      const [mouseClickPosition, zoom, pane] = set;
+      if (pane) {
         return null;
       }
 
       const delta = transformProjectionLocationToRealDistance(mouseClickPosition, zoom);
-      return addDistanceToMoveWithCurrentPosition(perspective, delta);
+      return delta;
     }),
-    filter((location: Location | null) => location !== null)
-  ) as Observable<Location>;
+    filter((delta: Vector | null) => delta !== null)
+  ) as Observable<Vector>;
+};
+
+/** @todo should cancel out on object click */
+/** Turns a vector stream and a starting location into a mapPosition stream. */
+export const getMapLocationStream = (
+  startLocation: Location,
+  vectorStream$: Observable<Vector>
+): Observable<Location> => {
+  return of(startLocation).pipe(
+    switchMapTo(
+      vectorStream$.pipe(
+        scan((acc, curr) => {
+          return {
+            x: acc.x + curr.dX,
+            y: acc.y + curr.dY,
+          };
+        }, startLocation)
+      )
+    ),
+    share({ connector: () => new ReplaySubject(1), resetOnRefCountZero: false })
+  );
 };
 
 const paneAtPosition = (position: Coordinates, pane: Pane): boolean => {
@@ -96,11 +127,4 @@ const objectAtLocation = (object: GameObject, location: Location): boolean => {
     }
   }
   return false;
-};
-
-const addDistanceToMoveWithCurrentPosition = (perspective: Location, delta: Vector): Location => {
-  return {
-    x: perspective.x + delta.dX,
-    y: perspective.y + delta.dY,
-  };
 };

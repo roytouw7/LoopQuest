@@ -2,7 +2,7 @@ import { Observable, switchMapTo, take } from "rxjs";
 import { PlayerCharacter } from "./src/character/src/character";
 import { buildGUI } from "./src/GUI/src/GUI";
 import { getMouseClickStream, getRightMouseClickStream, getZoomStream, setCanvasFullScreen } from "./src/IO/src";
-import { getGameObjectDetectionStream as newGameObjectDetectionStream } from "./src/IO/src/detection";
+import { getGameObjectDetectionStream as newGameObjectDetectionStream, getMapClickStream, getMapLocationStream } from "./src/IO/src/detection";
 import { GameObject } from "./src/objects/contracts/game-object";
 import { getGameObjectFactory } from "./src/objects/src/game-object-factory";
 import { ObjectManager } from "./src/objects/src/object-manager";
@@ -10,10 +10,11 @@ import { ObjectRenderer } from "./src/objects/src/object-renderer";
 
 setCanvasFullScreen().subscribe(() => {
   const characterStartLocation = { x: 0, y: 0 };
-  const character = new PlayerCharacter(getMouseClickStream(), characterStartLocation, getZoomStream());
+  const character = new PlayerCharacter(characterStartLocation);
   const perspective$ = character.position$;
 
   const gameObjectDetection$ = newGameObjectDetectionStream(perspective$);
+  getMapLocationStream({x: 0, y: 0}, getMapClickStream()).subscribe(console.log)
 
   const objectManager = ObjectManager.getInstance(perspective$);
   const objectRenderer = new ObjectRenderer(perspective$, getZoomStream());

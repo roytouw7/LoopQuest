@@ -1,7 +1,6 @@
-import { map, Observable, ReplaySubject, scan, share, startWith, tap, withLatestFrom } from "rxjs";
-import { Coordinates } from "../../contracts";
-import { Vector } from "../../movement/contracts/vector";
-import { transformProjectionLocationToRealDistance } from "../../movement/src/movement";
+import { Observable, startWith, tap } from "rxjs";
+import { log } from "../../helper/logOperator";
+import { getMapClickStream, getMapLocationStream } from "../../IO/src/detection";
 import { BaseSprite } from "../../objects";
 import { Location } from "../../objects/contracts/position";
 import { Sprite } from "../../objects/contracts/sprite";
@@ -11,35 +10,17 @@ export class PlayerCharacter extends BaseGameObject {
   private readonly _position$: Observable<Location>;
 
   public get position$(): Observable<Location> {
-    return this._position$.pipe(share({ connector: () => new ReplaySubject(1), resetOnRefCountZero: false }));
+    return this._position$;
   }
 
   /**
    * @todo character should consume the new mapClickStream, but mapClickStream requires perspective from character...?
    */
-  constructor(mapClick$: Observable<Coordinates>, startLocation: Location, zoom$: Observable<number>) {
+  constructor(startLocation: Location) {
     const sprite = PlayerCharacter.createCharacterSprite();
     super(sprite, { description: "The main character of the game!" }, startLocation);
-    this._position$ = this.coordinateToLocation(mapClick$, startLocation, zoom$);
-  }
-
-  private coordinateToLocation(
-    mouseClick$: Observable<Coordinates>,
-    startLocation: Location,
-    zoom$: Observable<number>
-  ) {
-    return mouseClick$.pipe(
-      withLatestFrom(zoom$),
-      map((set) => {
-        const [mouseClick, zoom] = set;
-        return transformProjectionLocationToRealDistance(mouseClick, zoom);
-      }),
-      scan((acc: Location, curr: Vector) => {
-        return {
-          x: acc.x + curr.dX,
-          y: acc.y + curr.dY,
-        };
-      }, startLocation),
+    console.log("creating character");
+    this._position$ = getMapLocationStream(startLocation, getMapClickStream()).pipe(
       tap((location) => (this.location = location)),
       startWith(startLocation)
     );
